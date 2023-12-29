@@ -1,23 +1,40 @@
-import logo from './logo.svg';
+import React, { useState, useEffect, createContext } from 'react';
 import './App.css';
+import ChatComponent from './Components/ChatComponent/ChatComponent';
+import LoginComponent from './Components/LoginComponent/LoginComponent';
 
+export const newContext = createContext()
 function App() {
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [messages, setMessages] = useState([]);
+
+  useEffect(() => {
+    const newMessageListener = (event) => {
+      setMessages((prevMessages) => [...prevMessages, event.data]);
+    };
+
+    window.addEventListener('message', newMessageListener);
+
+    return () => {
+      window.removeEventListener('message', newMessageListener);
+    };
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {console.log(messages)}
+      <newContext.Provider value={{ isLoggedIn, setIsLoggedIn, currentUser, setCurrentUser }}>
+        {isLoggedIn ? (
+          <ChatComponent
+            messages={messages}
+            onSendMessage={setMessages}
+            currentUser={currentUser}
+          />
+        ) : (
+          <LoginComponent />
+        )}
+      </newContext.Provider>
     </div>
   );
 }
